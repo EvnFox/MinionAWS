@@ -2,9 +2,7 @@
 # handeling the download and creation of files
 #
 #####################################################
-from msilib.schema import Directory
 import simplekml
-from numpy import empty
 from MinionAws.TransferManager import TransferManager
 import MinionAws.CsvtoTxt as ct
 import os
