@@ -66,8 +66,12 @@ class TransferManager:
 
         dels = os.listdir(self.Dir)
         for i in dels:
-            if i == 'sbd_' or i[0:4] == 'txt_' or i == 'csv' or i[0:10] == 'inaccurate':
+            if i == 'sbd_' or i[0:4] == 'txt_' or i == 'csv':
+                
                 shutil.rmtree(self.Dir + i)
+            elif i[0:10] == 'inaccurate':
+                os.remove(self.Dir+i)
+               
 
 
     # Resevered for future use
