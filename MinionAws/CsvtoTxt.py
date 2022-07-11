@@ -199,7 +199,29 @@ def find_delims(line):
             rate += line[i]
     return [code, title, rate]
 
+def csv_kml(IMEI, dir):
+    try:
+        path = dir + '\csv'
+        file = 'imei_' + str(IMEI) + '.csv'
+        file_path = path + '\\' + file
+        df = pd.read_csv(file_path)
+    except: 
+        print("could not get imei_{}.csv, make sure that the file exists".format(IMEI))
+        exit()
 
+     # Generates a path for the txt file that will be created. 
+ 
+
+    df = df.T
+    df = df.sort_values(by=1)
+
+    location_data = []
+
+    for i in range(df.shape[0]):
+        location_data.append((df.iloc[i, 4], df.iloc[i, 3]))
+        
+
+    return location_data
 
 
 

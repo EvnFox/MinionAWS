@@ -42,6 +42,17 @@ def func1():
     except: 
         for i in session.devices: 
             ct.create_files(i, session.Dir)
+    
+    
+    for i in session.devices:
+        kpath = session.Dir
+        kml_file = 'inaccurate_' + str(i) + '.kml'
+        kml_path = kpath + '\\' + kml_file
+    
+        data = ct.csv_kml(i, session.Dir)
+        line = kml.newlinestring(name='imei_{}'.format(i), coords=data)
+        kml.save(kml_path)
+
            
 def func2():
 	return
