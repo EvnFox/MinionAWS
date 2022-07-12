@@ -1,5 +1,4 @@
 # This python script is a GUI that handles downloading Minion data from AWS
-
 import simplekml
 from MinionAws.TransferManager import TransferManager
 import MinionAws.CsvtoTxt as ct
@@ -26,6 +25,7 @@ e = Label(root, text ='Minion Data\n{}'.format(session.Dir[0:-1]), width = 50, b
 e.grid(row = 0, column = 0, columnspan=4, padx=10, pady = 10)
 
 
+# func, ..., func3 handle the four main operations of the program
 def func():
     session.queue_to_s3() 	
 
