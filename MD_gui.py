@@ -1,8 +1,9 @@
+# This python script is a GUI that handles downloading Minion data from AWS
+
 import simplekml
 from MinionAws.TransferManager import TransferManager
 import MinionAws.CsvtoTxt as ct
 import os
-# import filedialog module
 from tkinter import *
 from tkinter import filedialog
 
@@ -10,23 +11,26 @@ from tkinter import filedialog
 session = TransferManager('https://sqs.us-east-1.amazonaws.com/728808211862/ICCMO.fifo','minion-data')
 kml = simplekml.Kml()
 
- 
-
+# Create TK object (main window)
 root = Tk()
 
+# Create titile 
 root.title('Minion Data')
+
+# Set the directory where files will be saved. Also set this as root directory for the program
 session.Dir = root.directory = filedialog.askdirectory() + "\\"
 #root.geometry('1200x600')
 
+#generated title of application and lists the CWD 
 e = Label(root, text ='Minion Data\n{}'.format(session.Dir[0:-1]), width = 50, borderwidth=5)
 e.grid(row = 0, column = 0, columnspan=4, padx=10, pady = 10)
 
 
 def func():
-    session.queue_to_s3() 
-	
+    session.queue_to_s3() 	
 
 def func1():
+    # empty the cwd before downloading new files 
     session.clean_dir()
     session.access_s3()
     session.jsontocsv()
@@ -40,10 +44,12 @@ def func1():
                                             coords=location_data)
                     kml.save('{}\\location.kml'.format(session.Dir))
     except: 
+        # If there is ever an issue with KML generation just create files normally
         for i in session.devices: 
             ct.create_files(i, session.Dir)
     
-    
+    # KML inaccurate is created using data from Iridium satilite not the GPS data transmitted by 
+    # the minion. 
     for i in session.devices:
         kpath = session.Dir
         kml_file = 'inaccurate_' + str(i) + '.kml'
@@ -52,7 +58,6 @@ def func1():
         data = ct.csv_kml(i, session.Dir)
         line = kml.newlinestring(name='imei_{}'.format(i), coords=data)
         kml.save(kml_path)
-
            
 def func2():
     a = filedialog.askdirectory()
@@ -137,15 +142,18 @@ def func3():
     c.grid(row=2, column=4, columnspan=1)
     window.mainloop()
 
+#Define the four main buttons for the application 
 b1 = Button(root, text='Transfer', padx=80, pady=20, command=func)
 b2 = Button(root, text='Compile', padx=80, pady=20, command=func1)
 b3 = Button(root, text='Archive', padx=80, pady=20, command=func2)
 b4 = Button(root, text='Unarchive', padx=80, pady=20, command=func3)
 
-
+#create grid to place things into the window. 
 b1.grid(row = 1, column = 1, columnspan=2)
 b2.grid(row = 2, column = 1, columnspan=2)
 b3.grid(row=3, column=1, columnspan=2)
 b4.grid(row=4, column =1, columnspan=2)
 
+#Run application
 root.mainloop()
+
