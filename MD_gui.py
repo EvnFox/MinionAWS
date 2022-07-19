@@ -51,12 +51,17 @@ def func1():
     # KML inaccurate is created using data from Iridium satilite not the GPS data transmitted by 
     # the minion. 
     for i in session.devices:
-        kpath = session.Dir
-        kml_file = 'inaccurate_' + str(i) + '.kml'
+        kpath = session.Dir + '\\txt_{}'.format(i)
+        kml_file = 'inaccurate.kml'
         kml_path = kpath + '\\' + kml_file
     
         data = ct.csv_kml(i, session.Dir)
-        line = kml.newlinestring(name='imei_{}'.format(i), coords=data)
+
+        for j in range(len(data)): 
+            kml.newpoint(name=str(j), coords=[data[j]])
+        #line = kml.newlinestring(name='imei_{}'.format(i), coords=data)
+
+    
         kml.save(kml_path)
            
 def func2():
