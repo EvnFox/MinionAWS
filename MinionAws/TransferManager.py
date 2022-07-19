@@ -45,7 +45,7 @@ class TransferManager:
             self.bucket = self._s3.Bucket(sname)
         except: 
             print("Unable to access AWS")
-    # puts time into csv so that it can be sorted correclty 
+    # puts time into unix time so that it can be sorted correclty 
     def unix_time(self, time):
         #012345678912345678912
         #6/16/2022  2:14:02 PM
@@ -293,3 +293,5 @@ class TransferManager:
                         #this can only happen if copy is sucsessful
                         delete_req = client.delete_object(Bucket=self.sname,Key=item)
                         print(delete_req) 
+        else: 
+            print('S3 bucket not set by constructor')
