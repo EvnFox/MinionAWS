@@ -57,10 +57,11 @@ def func1():
         multipnt = kml.newmultigeometry(name='imei_{}'.format(i))
         data = ct.csv_kml(i, session.Dir)
 
-        for j in range(len(data)): 
-            multipnt.newpoint(name=str(j), coords=[data[j]])
         multipnt.newlinestring(name='imei_{}'.format(i), coords=data)
 
+        for j in range(len(data)): 
+            multipnt.newpoint(name=str(j), coords=[data[j]])
+        
     
         kml.save(kml_path)
            
