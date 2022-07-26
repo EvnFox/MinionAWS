@@ -54,12 +54,12 @@ def func1():
         kpath = session.Dir + '\\txt_{}'.format(i)
         kml_file = 'inaccurate.kml'
         kml_path = kpath + '\\' + kml_file
-    
+        multipnt = kml.newmultigeometry(name='imei_{}'.format(i))
         data = ct.csv_kml(i, session.Dir)
 
         for j in range(len(data)): 
-            kml.newpoint(name=str(j), coords=[data[j]])
-        #line = kml.newlinestring(name='imei_{}'.format(i), coords=data)
+            multipnt.newpoint(name=str(j), coords=[data[j]])
+        multipnt.newlinestring(name='imei_{}'.format(i), coords=data)
 
     
         kml.save(kml_path)
@@ -99,7 +99,7 @@ def func2():
     b.grid(row=2, column=2, columnspan=1)
     c.grid(row=2, column=3, columnspan=1)
     window.mainloop()
-	
+
 def func3():
     
     window = Tk()

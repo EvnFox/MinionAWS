@@ -26,4 +26,8 @@ except:
 for i in ['pandas', 'simplekml', 'numpy', 'boto3', 'datetime', 'glob']:
     os.system('pip install {}'.format(i))
 
-os.system('aws configure')
+
+inp = input('Have you configured AWS cli? (y/n)')
+
+if inp.lower() == 'y':
+    os.system('aws configure')
