@@ -34,22 +34,25 @@ def func1():
     session.clean_dir()
     session.access_s3()
     session.jsontocsv()
-    try:
-            # Try to generate KML files
-            for i in session.devices: 
+    
+    for i in session.devices: 
+        # ct.create files generates all files and returns location data to be formated 
+        # into kml. 
+        location_data = ct.create_files(i, session.Dir)
+        multipnt = kml.newmultigeometry(name='imei{}'.format(i))
 
-                location_data = ct.create_files(i, session.Dir)
-                if location_data != []:
-                    lin = kml.newlinestring(name='imei_{}'.format(i),
-                                            coords=location_data)
-                    kml.save('{}\\location.kml'.format(session.Dir))
-    except: 
-        # If there is ever an issue with KML generation just create files normally
-        for i in session.devices: 
-            ct.create_files(i, session.Dir)
+        multipnt.newlinestring(name='imei_{}'.format(i), 
+                                coords=location_data)
+
+        if location_data != []:
+            for j in range(len(location_data)):
+                multipnt.newpoint(name=str(j),
+                                coords=location_data[j])
+            kml.save('{}\\location.kml'.format(session.Dir))
+
     
     # KML inaccurate is created using data from Iridium satilite not the GPS data transmitted by 
-    # the minion. 
+    # the minion.
     for i in session.devices:
         kpath = session.Dir + '\\txt_{}'.format(i)
         kml_file = 'inaccurate.kml'

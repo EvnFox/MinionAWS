@@ -95,8 +95,8 @@ class TransferManager:
                 for message in self.messages: 
                     try: 
                         #get IMEI so that the message is saved to the correct folder on S3
-                        data = json.load(message.body)
-                        header = data['data']['header']
+                        data = json.loads(message.body)
+                        header = data['data']['mo_header']
                         imei = header['imei']
 
                         # Save obj to S3
