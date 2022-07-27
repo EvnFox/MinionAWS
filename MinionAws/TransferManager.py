@@ -46,7 +46,7 @@ class TransferManager:
         except: 
             print("Unable to access AWS")
     # puts time into unix time so that it can be sorted correclty 
-    def unix_time(self, time):
+    def unix_time(self, time : str):
         #012345678912345678912
         #6/16/2022  2:14:02 PM
         if time[19:21] == 'PM':
@@ -155,7 +155,7 @@ class TransferManager:
                         else:
                             raise
 
-    def create_dir(self, type, IMEI):
+    def create_dir(self, type : str, IMEI):
         try: 
             os.mkdir(self.Dir + "\\{}_".format(type) + str(IMEI))
             print("created \\{}_".format(type) + str(IMEI))
