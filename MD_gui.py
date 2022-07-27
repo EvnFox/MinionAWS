@@ -40,34 +40,34 @@ def func1():
         # into kml. 
         location_data = ct.create_files(i, session.Dir)
         if location_data != []:
-            multipnt = kml.newmultigeometry(name='imei{}'.format(i))
+            multipnt1 = kml.newmultigeometry(name='imei_{}'.format(i))
 
-            multipnt.newlinestring(name='imei_{}'.format(i), 
-                                coords=location_data)
+            #multipnt1.newlinestring(name='imei_{}'.format(i), 
+            #                   coords=[location_data])
 
             
             for j in range(len(location_data)):
-                multipnt.newpoint(name=str(j),
-                                coords=location_data[j])
-            kml.save('{}\\location.kml'.format(session.Dir))
+               pnt = multipnt1.newpoint(name=str(j),
+                                   description =str(j),
+                                   coords=[location_data[j]])
+        kml.save('{}\\txt_{}\\location.kml'.format(session.Dir, i))
 
     
     # KML inaccurate is created using data from Iridium satilite not the GPS data transmitted by 
     # the minion.
-    for i in session.devices:
-        kpath = session.Dir + '\\txt_{}'.format(i)
-        kml_file = 'inaccurate.kml'
-        kml_path = kpath + '\\' + kml_file
-        multipnt = kml.newmultigeometry(name='imei_{}'.format(i))
-        data = ct.csv_kml(i, session.Dir)
+    #for i in session.devices:
+        #kpath = session.Dir + '\\txt_{}'.format(i)
+        #kml_file = 'inaccurate.kml'
+       # kml_path = kpath + '\\' + kml_file
+       # multipnt = kml.newmultigeometry(name='imei_{}'.format(i))
+       # data = ct.csv_kml(i, session.Dir)
 
-        multipnt.newlinestring(name='imei_{}'.format(i), coords=data)
+       # multipnt.newlinestring(name='imei_{}'.format(i), coords=data)
 
-        for j in range(len(data)): 
-            multipnt.newpoint(name=str(j), coords=[data[j]])
-        
+      #  for j in range(len(data)): 
+       #     multipnt.newpoint(name=str(j), coords=[data[j]])
     
-        kml.save(kml_path)
+    #kml.save(kml_path)
            
 def func2():
     a = filedialog.askdirectory()

@@ -121,7 +121,7 @@ def create_files(IMEI, dir):
                 if line[1:3] == '04': 
                     location = line.split(',')
                     
-                    location_data.append((location[-2], location[-1]))
+                    location_data.append((location[-1], location[-2]))
                     
                     
             
