@@ -54,20 +54,22 @@ def func1():
 
     
     # KML inaccurate is created using data from Iridium satilite not the GPS data transmitted by 
-    # the minion.
-    #for i in session.devices:
-        #kpath = session.Dir + '\\txt_{}'.format(i)
-        #kml_file = 'inaccurate.kml'
-       # kml_path = kpath + '\\' + kml_file
-       # multipnt = kml.newmultigeometry(name='imei_{}'.format(i))
-       # data = ct.csv_kml(i, session.Dir)
+    # the minion. by defult it is disabled. 
+    flag = False
+    if flag: 
+        for i in session.devices:
+            kpath = session.Dir + '\\txt_{}'.format(i)
+            kml_file = 'inaccurate.kml'
+            kml_path = kpath + '\\' + kml_file
+            multipnt = kml.newmultigeometry(name='imei_{}'.format(i))
+            data = ct.csv_kml(i, session.Dir)
 
-       # multipnt.newlinestring(name='imei_{}'.format(i), coords=data)
+            multipnt.newlinestring(name='imei_{}'.format(i), coords=data)
 
-      #  for j in range(len(data)): 
-       #     multipnt.newpoint(name=str(j), coords=[data[j]])
+        for j in range(len(data)): 
+            multipnt.newpoint(name=str(j), coords=[data[j]])
     
-    #kml.save(kml_path)
+    kml.save(kml_path)
            
 def func2():
     a = filedialog.askdirectory()
