@@ -69,7 +69,7 @@ def func1():
         for j in range(len(data)): 
             multipnt.newpoint(name=str(j), coords=[data[j]])
     
-    kml.save(kml_path)
+        kml.save(kml_path)
            
 def func2():
     a = filedialog.askdirectory()
