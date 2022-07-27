@@ -40,16 +40,16 @@ def func1():
         # into kml. 
         location_data = ct.create_files(i, session.Dir)
         if location_data != []:
-            multipnt1 = kml.newmultigeometry(name='imei_{}'.format(i))
-
+            #multipnt1 = kml.newmultigeometry(name='imei_{}'.format(i))
+            kml = simplekml.Kml()
             #multipnt1.newlinestring(name='imei_{}'.format(i), 
             #                   coords=[location_data])
 
             
             for j in range(len(location_data)):
-               pnt = multipnt1.newpoint(name=str(j),
-                                   description =str(j),
-                                   coords=[location_data[j]])
+               pnt = kml.newpoint(name=str(j),description =str(j))
+               pnt.coords = [location_data[j]]
+                                   
         kml.save('{}\\txt_{}\\location.kml'.format(session.Dir, i))
 
     
