@@ -39,12 +39,13 @@ def func1():
         # ct.create files generates all files and returns location data to be formated 
         # into kml. 
         location_data = ct.create_files(i, session.Dir)
-        multipnt = kml.newmultigeometry(name='imei{}'.format(i))
+        if location_data != []:
+            multipnt = kml.newmultigeometry(name='imei{}'.format(i))
 
-        multipnt.newlinestring(name='imei_{}'.format(i), 
+            multipnt.newlinestring(name='imei_{}'.format(i), 
                                 coords=location_data)
 
-        if location_data != []:
+            
             for j in range(len(location_data)):
                 multipnt.newpoint(name=str(j),
                                 coords=location_data[j])
@@ -134,8 +135,11 @@ def func3():
             window.destroy()
             return
         try:
-            os.rename(session.Dir  + mission_inp.get() +'_txt_' + imei, session.Dir + '\\txt_' + imei)
+            if session.Dir  + mission_inp.get() +'_txt_' + imei in os.listdir():
+                os.rename(session.Dir  + mission_inp.get() +'_txt_' + imei, session.Dir + '\\txt_' + imei)
+            
         except: 
+            # os.remame gives an execption if the file we are trying to name already exists. 
             print('Unarchived version of IMEI exists in the same directory\nTo prevent data loss make sure you archive the active session')
             window.destroy()
             return

@@ -170,7 +170,7 @@ def create_files(IMEI, dir):
                         f.write(line)
                 except: 
                     print("Main text file didn't start with file break '$' ")
-                    exit()
+                    
 
     return location_data
     # Delete the maintxt file since it is no longer useful. Once we get here all txt files 
