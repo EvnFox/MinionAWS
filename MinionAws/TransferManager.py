@@ -223,7 +223,7 @@ class TransferManager:
             except:
                 df.to_csv(file_path, mode = 'a', encoding='utf-8', index=False)
     
-    def archive(self, imei, name):
+    def archive(self, imei : str, name : str):
 
         if self.bucket is not None:
             
@@ -262,7 +262,7 @@ class TransferManager:
         
 
     ## ^^^ this is going to need an undo method so that the effects can be reversed. 
-    def unarchive(self, imei, name):
+    def unarchive(self, imei : str, name : str):
 
         if self.bucket is not None:
             
