@@ -1,16 +1,12 @@
-from distutils import text_file
 import pandas as pd 
-import numpy as np 
 import os 
-
-from datetime import datetime, timezone
-
+from datetime import datetime
 
 
-
-# takes in imei of sbd device as string or int and will create a new maintxt file conatining the data, this data 
-def convert(IMEI, dir):
-
+def convert(IMEI : str, dir : str):
+    '''
+    This function is called by create_files() 
+    '''
     try: 
         os.mkdir(dir + "\\txt_" + str(IMEI))
         print('directory created')
@@ -78,126 +74,158 @@ def convert(IMEI, dir):
     T.close()
 
 
-# create_files(IMEI) -- takes IMEI as string or int and will turn the text file created by convert() 
-# into multiple text files each containg one complete file. 
-def create_files(IMEI, dir): 
 
-    # Generate a master text file containing all data that can be parsed through.
+def create_files(IMEI : str, dir : str) -> list: 
+    '''
+    Handles generation of minion data from CSV, this function works in two steps, 
+    first it calls the convert() function which takes the csv and pastes all payloads 
+    into a main txt file. Then the rest of this function loops through the txt file 
+    and produces all other files from it. When it produces indiviual files for $0x, 
+    it adds unix time and sample numbers. CSV must be of form outputed by 
+    TransferManager.jsontoscsv()
+
+    input: IMEI - string, The imei of the device whose csv needs to be compiled. 
+
+            dir - string, directory where the csv folder is located. 
+
+    output: Generates $01, $02, $03, $04 file types 
+    returns: list containg gps data (eg. (lat, lon))
+    
+    '''
+
+    # Generate a main text file containing all data that can be parsed through.
     convert(IMEI, dir)
 
     
     #Creates the path based on the given IMEI. 
-    try:
-        path = dir + '\\txt_' + str(IMEI)
-        file = 'imei_' + str(IMEI) + '.txt'
-        file_path = path + '\\' + file
-    except: 
-        print("imei_{}.txt does not exist".format(IMEI))
-
+ 
+    path = dir + '\\txt_' + str(IMEI)
+    file = 'imei_' + str(IMEI) + '.txt'
+    file_path = path + '\\' + file
+   
     #sample number; resets after new file header
     k = 0
 
     #string that will hold unix time
     time = '1'
 
-    #sampling rate
+    # sampling rate
     rate = 0.25
+
     delims = []
     
     with open(file_path, 'r') as maintxt:
         current_file = ''
         location_data = []
         for line in maintxt: 
-            #delims[0] = file code (ex 04), delims[1] = title (eg file name and date), delims[2] = sampling rate
-            delims = find_delims(line)
+            ## NOTE: delims[0] = file code (eg $04), delims[1] = title (eg file name and date), delims[2] = sampling rate
+            
             
             #if the begining of a line contains a filebreak then open a new file and begin writing to it. since 
-            # we created a new line for every file break we know the begining of a header can only be at line[0]
-
+            # we created a new line for every file break in convert() we know the begining of a header can only be at line[0]
             if line[0] == '$':
 
+                delims = line.split(',')
+
                 # When a file break is deteced we create a new filepath with the file code appened to the end of the file path
-                current_file = path + "\\imei_" + str(IMEI)+ "_" + str(line[1:3]) + ".txt" 
-                if line[1:3] == '04': 
-                    location = line.split(',')
+                current_file = path + "\\" + str(delims[0]) + ".txt" 
+
+                # If the transmission was GPS
+                if delims[0] == '$04': 
+                    #$04,027,2022,07,27,12,59,06,41.491937,-71.422375
+                    l= line.split(',')
+
+                    # this if checks if msg was time stamped and generated unix time
+                    try: 
+                        if int(l[2]) > 0:
+                        
+                            dt = datetime(int(l[2]), int(l[3]), int(l[4]), int(l[5]), int(l[6]), int(l[7]))
+                            time = str(dt.timestamp())
+                        else:
+                            time = 'Nan'
+                    except: 
+                        time = 'Nan'
                     
-                    location_data.append((location[-1], location[-2]))
-                    
-                    
-            
-                # This handles generating unix time for the document. 
-                try: 
-                    dt = datetime(int(line[8:12]), int(line[13:15]), int(line[16:18]), int(line[19:21]), int(line[22:24]), int(line[25:27]))
-                    time = str(dt.timestamp())
+                    # This is a new header with unix time 
+                    delims = [delims[0], delims[1], time, delims[-2], delims[-1]]
+                    # append the data to be returned
+                    location_data.append((l[-1], l[-2]))
+                
+                # If it was not GPS data then it is minion data
+                else: 
+                    # set sample rate
                     rate = float(delims[2])
-                except:
-                    # this means there was an error generating the unix time
-                    time = '1'
 
+                    # This handles generating unix time for the document. 
+                    try: 
+                        # delims[1] contains header 
+                        # ex) delims = ['$02', '001-2022-05-20_15-00-54_TEMPPRES.txt', '0.25', 'Pressure(dbar*1000)', 'Temp(C*100)', 'TempTSYS01(C*100)']
+                        # so delims[1] = '001-2022-05-20_15-00-54_TEMPPRES.txt'
+                        t = delims[1].split('-')
+                        # for example t = ['001', '2022', '05', '20_15', '00', '54_TEMPPRES.txt']
+                        # so we need to split more
+                        s = []
+                        for i in range(len(t)): 
+                            for j in t[i].split('_'):
+                                s.append(j)
+                        # example s = ['001', '2022', '05', '20', '15', '00', '54', 'TEMPPRES.txt'] as desired
+                        try: 
+                            if int(s[1]) > 0 :
 
-                # Since we are only in this if statement if a file break was detected we open the new file and append unix time 
-                # if it was generated correctly. Then the line from the maintext is saved to the file. 
+                                dt = datetime(int(s[1]), int(s[2]), int(s[3]), int(s[4]), int(s[5]), int(s[6]))
+                                time = str(dt.timestamp())
+                            else: 
+                                time = 'Nan'
+                        except:
+                            time = 'Nan'
+                        
+                        
+                    except:
+                        # This means the header does not match what the program expects. 
+                        print('Error generating header. Make sure header matched what was expected\n')
+                        raise
+                    
+                    # new header
+                    delims[1] = s[0] + '_' + time + '_' + s[-1]
+
+                # At this point we have looked at the header and changed the time stamp to unix time or Nan. 
+                # So now we open the file and write the first line to it. 
                 with open(current_file, 'a') as f:
 
-                    if time != '1':
-                        #if we have valid time data paste it
-                        line = line[:8] + time + line[27:]
-
-                    else:
-                        #We are here if we have a new file with no valied time data. If this is a GPS file 
-                        # then it is 04 and we want to get rid of indicies 8 to 27. If it is not a GPS file 
-                        # then it is a data file with no time and we just want to include NaN without deleteing any
-                        # thing. This is hardcoded based on known errors with the files, if a new error is introduced 
-                        # this will likely produce unexpected behavior.
-                        if line[1:3] =='04':
-                            line = line[:8] + 'NaN' + line[27:]
-                        else: 
-                            line = line[:8] + 'NaN' + line[8:]
+                    line = ''
+                    #print(delims)
+                    for i in delims[0:-1]: 
+                        j = i + ','
+                        line += j
+                    line = line + delims[-1]
 
                     f.write(line)
+
+                    # Since we are doing a knew file we want to reset the the sample counter to 0.
                     k = 0
             else: 
                 # If no file break was dected, we write to the previous file. Note that every maintext should start with a new file,
-                # if it doesnt then there will be an exeption since current_file = '' by defult (see line 76) and this cannont be written to.
+                # if it doesnt then the program will write to the non existing previous file 
+                # # and there will be an exeption since current_file = '' by defult and this cannont be written to.
                 try: 
                     with open(current_file, 'a') as f:
-                        if time != '1':
-                            # The first term on the left adds the sampling time.The second term is the sample number
+                        # if the doc was time stamped correctly we will add the time to each sample
+                        if time != 'Nan':
+                            # The first term on the left adds the sampling time. The second term 'k' is the sample number
                             line = str(float(time) + k*(1/rate)) + ',' + str(k) + ',' + line
                         else: 
-                            line = 'NaN,' + str(k) + ',' + line
+                            line = 'Nan,' + str(k) + ',' + line
+                        # increment the sample number
                         k += 1
                         f.write(line)
                 except: 
-                    print("Main text file didn't start with file break '$' ")
+                    # if current file could not be oppened then it is probably because the main txt file 
+                    # did not start with a new file header. 
+                    print("Main text file didn't start with file break '$' see 'minionaws\CsvtoTxt.py' line 223 ")
                     
 
     return location_data
-    # Delete the maintxt file since it is no longer useful. Once we get here all txt files 
-    # have been created. if you are having issues comment the below out and see if the txt file is being generated 
-    # correctly.
-    #os.remove(file_path)
 
-# This function will loop through the header of a file and find the file code, title, and sampling rate.
-
-def find_delims(line):
-    
-    count = 0
-    code = ''
-    title = ''
-    rate = ''
-
-    for i in range(0, len(line)): 
-        if line[i] == ',':
-            count += 1
-            continue
-        if count == 0: 
-            code += line[i] 
-        elif count == 1: 
-            title += line[i]
-        elif count == 2: 
-            rate += line[i]
-    return [code, title, rate]
 
 def csv_kml(IMEI, dir):
     try:

@@ -50,7 +50,7 @@ def func1():
                pnt = kml.newpoint(name=str(j),description =str(j))
                pnt.coords = [location_data[j]]
                                    
-        kml.save('{}\\txt_{}\\location.kml'.format(session.Dir, i))
+            kml.save('{}\\txt_{}\\location.kml'.format(session.Dir, i))
 
     
     # KML inaccurate is created using data from Iridium satilite not the GPS data transmitted by 

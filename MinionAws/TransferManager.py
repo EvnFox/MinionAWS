@@ -67,8 +67,11 @@ class TransferManager:
         dels = os.listdir(self.Dir)
         for i in dels:
             if i == 'sbd_' or i[0:4] == 'txt_' or i == 'csv':
-                
-                shutil.rmtree(self.Dir + i)
+                try:
+                    shutil.rmtree(self.Dir + i)
+                except NotADirectoryError:
+                    os.remove(self.Dir + i) 
+
             elif i[0:10] == 'inaccurate':
                 os.remove(self.Dir+i)
                
@@ -261,7 +264,7 @@ class TransferManager:
         
         
 
-    ## ^^^ this is going to need an undo method so that the effects can be reversed. 
+    
     def unarchive(self, imei : str, name : str):
 
         if self.bucket is not None:
