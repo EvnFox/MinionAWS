@@ -41,7 +41,7 @@ def func1():
         location_data = ct.create_files(i, session.Dir)
         if location_data != []:
             #multipnt1 = kml.newmultigeometry(name='imei_{}'.format(i))
-            kml = simplekml.Kml()
+            
             #multipnt1.newlinestring(name='imei_{}'.format(i), 
             #                   coords=[location_data])
 
@@ -50,7 +50,7 @@ def func1():
                pnt = kml.newpoint(name=str(j),description =str(j))
                pnt.coords = [location_data[j]]
                                    
-        kml.save('{}\\txt_{}\\location.kml'.format(session.Dir, i))
+            kml.save('{}\\txt_{}\\location.kml'.format(session.Dir, i))
 
     
     # KML inaccurate is created using data from Iridium satilite not the GPS data transmitted by 
