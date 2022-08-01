@@ -6,13 +6,18 @@ import os
 from datetime import datetime, timezone
 
 
+import platform
+if platform.system() == 'Windows':
+    _SLASH = '\\'
+else: 
+    _SLASH = '/'
 
 
 # takes in imei of sbd device as string or int and will create a new maintxt file conatining the data, this data 
 def convert(IMEI, dir):
 
     try: 
-        os.mkdir(dir + "\\txt_" + str(IMEI))
+        os.mkdir(dir + _SLASH + "txt_" + str(IMEI))
         print('directory created')
     except:
         print("txt directory already exists")
@@ -23,18 +28,18 @@ def convert(IMEI, dir):
     #
     # Create the path to find the csv file. 
     try:
-        path = dir + '\csv'
+        path = dir + _SLASH + 'csv'
         file = 'imei_' + str(IMEI) + '.csv'
-        file_path = path + '\\' + file
+        file_path = path + _SLASH + file
         df = pd.read_csv(file_path)
     except: 
         print("could not get imei_{}.csv, make sure that the file exists".format(IMEI))
         exit()
 
     # Generates a path for the txt file that will be created. 
-    tpath = dir + "\\txt_" + str(IMEI)
+    tpath = dir + _SLASH + "txt_" + str(IMEI)
     txt_file = 'imei_' + str(IMEI) + '.txt'
-    txt_path = tpath + '\\' + txt_file
+    txt_path = tpath + _SLASH + txt_file
 
     # This will create the txt file and write to it. Note: if a txt file already exists with 
     # the same name it will be overwritten. 
@@ -88,9 +93,9 @@ def create_files(IMEI, dir):
     
     #Creates the path based on the given IMEI. 
     try:
-        path = dir + '\\txt_' + str(IMEI)
+        path = dir + _SLASH + 'txt_' + str(IMEI)
         file = 'imei_' + str(IMEI) + '.txt'
-        file_path = path + '\\' + file
+        file_path = path + _SLASH + file
     except: 
         print("imei_{}.txt does not exist".format(IMEI))
 
@@ -117,7 +122,7 @@ def create_files(IMEI, dir):
             if line[0] == '$':
 
                 # When a file break is deteced we create a new filepath with the file code appened to the end of the file path
-                current_file = path + "\\imei_" + str(IMEI)+ "_" + str(line[1:3]) + ".txt" 
+                current_file = path + _SLASH + "imei_" + str(IMEI)+ "_" + str(line[1:3]) + ".txt" 
                 if line[1:3] == '04': 
                     location = line.split(',')
                     
@@ -201,9 +206,9 @@ def find_delims(line):
 
 def csv_kml(IMEI, dir):
     try:
-        path = dir + '\csv'
+        path = dir + _SLASH + 'csv'
         file = 'imei_' + str(IMEI) + '.csv'
-        file_path = path + '\\' + file
+        file_path = path + _SLASH + file
         df = pd.read_csv(file_path)
     except: 
         print("could not get imei_{}.csv, make sure that the file exists".format(IMEI))

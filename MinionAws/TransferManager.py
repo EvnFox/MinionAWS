@@ -7,8 +7,11 @@ import glob
 import shutil
 from datetime import datetime
 
-
-
+import platform
+if platform.system() == 'Windows':
+    _SLASH = '\\'
+else: 
+    _SLASH = '/'
 class TransferManager: 
     '''
     This class handles Iridium SBD data contained in jsons on a SQS server and transfers it to S3 storage for later cleaning
@@ -36,6 +39,8 @@ class TransferManager:
         self.IMEI = None
         self.failed_connections = 0; self.successful_connections = 0
         self.mt = 0
+
+        
        
         self.qname = qname
         self.sname = sname
@@ -123,7 +128,7 @@ class TransferManager:
     def access_s3(self):
         
         # Create directory to store SBD data
-        self.create_dir('sbd', '\\' )
+        self.create_dir('sbd', _SLASH )
         
         if self.bucket is not None:
             
@@ -145,7 +150,7 @@ class TransferManager:
                             continue
                         
                         #print(item[21:])
-                        self.bucket.download_file(item, '{0}\\{1}'.format(self.Dir + 'sbd_', item[21:]))
+                        self.bucket.download_file(item, '{0}{1}{2}'.format(self.Dir + 'sbd_', _SLASH,item[21:]))
                         
                     except botocore.exceptions.ClientError as e:
 
@@ -157,7 +162,7 @@ class TransferManager:
 
     def create_dir(self, type : str, IMEI):
         try: 
-            os.mkdir(self.Dir + "\\{}_".format(type) + str(IMEI))
+            os.mkdir(self.Dir + _SLASH +"{}_".format(type) + str(IMEI))
             print("created \\{}_".format(type) + str(IMEI))
             
         except: 
@@ -165,7 +170,7 @@ class TransferManager:
 
     def jsontocsv(self):
 
-        path = self.Dir + "\\csv"
+        path = self.Dir + _SLASH + "csv"
         try: 
             os.mkdir(path)
             print('directory created')
@@ -174,7 +179,7 @@ class TransferManager:
         # Get messages 
         try: 
             # Get the sbd directory, this returns everythin in arbitrary order so it has to be resorted later.
-            messages = glob.glob(self.Dir + '\\sbd_\\*')
+            messages = glob.glob(self.Dir +_SLASH +'sbd_{}*'.format(_SLASH))
         except: 
             print('Failed to load directory')
             exit()
@@ -210,13 +215,13 @@ class TransferManager:
                 
             IMEI = header['imei']
             file_name = "imei_" + IMEI + ".csv"
-            file_path = path + "\\" + file_name
+            file_path = path + _SLASH + file_name
 
             df = pd.DataFrame(arr)
             df.T
             #print(df.iloc[0])
             try: 
-                x = pd.read_csv(self.Dir + '\\csv\\imei_' + IMEI  + '.csv')
+                x = pd.read_csv(self.Dir + _SLASH + 'csv{}imei_'.format(_SLASH) + IMEI  + '.csv')
                 df = pd.concat([x,df], axis = 1)
                 #
                 df.to_csv(file_path, encoding='utf-8', index = False)

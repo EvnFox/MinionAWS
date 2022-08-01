@@ -6,6 +6,12 @@ import os
 from tkinter import *
 from tkinter import filedialog
 
+import platform
+if platform.system() == 'Windows':
+    _SLASH = '\\'
+else: 
+    _SLASH = '/'
+
 #initilize a session
 session = TransferManager('https://sqs.us-east-1.amazonaws.com/728808211862/ICCMO.fifo','minion-data')
 kml = simplekml.Kml()
@@ -17,7 +23,7 @@ root = Tk()
 root.title('Minion Data')
 
 # Set the directory where files will be saved. Also set this as root directory for the program
-session.Dir = root.directory = filedialog.askdirectory() + "\\"
+session.Dir = root.directory = filedialog.askdirectory() + _SLASH
 #root.geometry('1200x600')
 
 #generated title of application and lists the CWD 
@@ -50,17 +56,17 @@ def func1():
                pnt = kml.newpoint(name=str(j),description =str(j))
                pnt.coords = [location_data[j]]
                                    
-            kml.save('{}\\txt_{}\\location.kml'.format(session.Dir, i))
-
+            
+            kml.save(session.Dir + _SLASH + 'txt_'+i + _SLASH + "location.kml")
     
     # KML inaccurate is created using data from Iridium satilite not the GPS data transmitted by 
     # the minion. by defult it is disabled. 
     flag = False
     if flag: 
         for i in session.devices:
-            kpath = session.Dir + '\\txt_{}'.format(i)
+            kpath = session.Dir + _SLASH + 'txt_{}'.format(i)
             kml_file = 'inaccurate.kml'
-            kml_path = kpath + '\\' + kml_file
+            kml_path = kpath + _SLASH + kml_file
             multipnt = kml.newmultigeometry(name='imei_{}'.format(i))
             data = ct.csv_kml(i, session.Dir)
 
@@ -90,7 +96,7 @@ def func2():
 
     def save(): 
         try:
-            os.rename(session.Dir + '\\txt_' + imei, session.Dir + '\\' + inp.get() +'_txt_' + imei)
+            os.rename(session.Dir + _SLASH + 'txt_' + imei, session.Dir + _SLASH + inp.get() +'_txt_' + imei)
         except: 
             print('mission name already in use' )
             window.destroy()
@@ -138,7 +144,7 @@ def func3():
             return
         try:
             if session.Dir  + mission_inp.get() +'_txt_' + imei in os.listdir():
-                os.rename(session.Dir  + mission_inp.get() +'_txt_' + imei, session.Dir + '\\txt_' + imei)
+                os.rename(session.Dir  + mission_inp.get() +'_txt_' + imei, session.Dir + _SLASH + 'txt_' + imei)
             
         except: 
             # os.remame gives an execption if the file we are trying to name already exists. 
