@@ -12,6 +12,7 @@ if platform.system() == 'Windows':
     _SLASH = '\\'
 else: 
     _SLASH = '/'
+    
 class TransferManager: 
     '''
     This class handles Iridium SBD data contained in jsons on a SQS server and transfers it to S3 storage for later cleaning
