@@ -12,7 +12,9 @@ else:
 
 def convert(IMEI : str, dir : str):
     '''
-    This function is called by create_files() 
+    This function is called by create_files(), we just loop through a given csv of proper formatting 
+    and paste the payloads into a txt file putting the header of a new file on a newline. Only sbd payloads 
+    get put into this file, all metadata is left in the csv.
     '''
     try: 
         os.mkdir(dir + _SLASH + "txt_" + str(IMEI))
@@ -40,16 +42,20 @@ def convert(IMEI : str, dir : str):
     txt_path = tpath + _SLASH + txt_file
 
     # This will create the txt file and write to it. Note: if a txt file already exists with 
-    # the same name it will be overwritten. 
+    # the same name it will be overwritten. See readme on github for info on how to make sure data is never lost.
     with open(txt_path, 'w') as T: 
 
         line_num = 0
         # loop through csv
         df = df.T
+        # the payloads will be in random order due to transfer managers use of the glob module. 
+        # this could be improved in the future but since all payloads are timestamped by iriduim 
+        # we let glob randomize their order and then reorder the csv using iridiums time data. 
         df = df.sort_values(by=1)
         
+        # loop through payloads
         for i in df.iloc[0:df.shape[0], 5]: 
-
+            # This is a failed connection on aws side
             if i == 'NaN':
                 continue
 
@@ -57,7 +63,7 @@ def convert(IMEI : str, dir : str):
             j = bytes.fromhex(i)
             ascii = j.decode("ASCII")
             
-            # This loop creates a new line whenever a file break is detected, this makes our life easier in the create_files function.
+            # This loop inserts a new line whenever a file break is detected, this makes our life easier in the create_files function.
             # We change the range in the first loop since we do not want to add a newline to the top of the file
             if line_num == 0: 
                 l = len(ascii)
@@ -85,12 +91,12 @@ def convert(IMEI : str, dir : str):
 def create_files(IMEI : str, dir : str) -> list: 
     '''
     Handles generation of minion data from CSV, this function works in two steps, 
-    first it calls the convert() function which takes the csv and pastes all payloads 
+    first it calls the convert() function which takes the csv sorts it and pastes all payloads 
     into a main txt file. Then the rest of this function loops through the txt file 
-    and produces all other files from it. When it produces indiviual files for $0x, 
+    and produces all other files from it. It produces indiviual files for $0x, 
     it adds unix time and sample numbers. CSV must be of form outputed by 
     TransferManager.jsontoscsv()
-    input: IMEI - string, The imei of the device whose csv needs to be compiled. 
+    input: IMEI - string, The imei of the device whose csv needs to be processed. 
             dir - string, directory where the csv folder is located. 
     output: Generates $01, $02, $03, $04 file types 
     returns: list containg gps data (eg. (lat, lon))
@@ -113,7 +119,7 @@ def create_files(IMEI : str, dir : str) -> list:
     #string that will hold unix time
     time = '1'
 
-    # sampling rate
+    # sampling rate defult
     rate = 0.25
 
     delims = []
@@ -185,15 +191,17 @@ def create_files(IMEI : str, dir : str) -> list:
                         
                         
                     except:
-                        # This means the header does not match what the program expects. 
+                        # This means the header does not match what the program expects. Look at main text file to see what was sent by the minion
                         print('Error generating header. Make sure header matched what was expected\n')
                         raise
                     
-                    # new header
+                    # new header using unit timestape if it exists or Nan
                     delims[1] = s[0] + '_' + time + '_' + s[-1]
 
                 # At this point we have looked at the header and changed the time stamp to unix time or Nan. 
                 # So now we open the file and write the first line to it. 
+                # by defult current file = '' which cannot be written to, but since we know the transmission from the minion will begin with 
+                # a new file break, current file will get set to a vaild path from the first line. 
                 with open(current_file, 'a') as f:
 
                     line = ''
@@ -210,7 +218,7 @@ def create_files(IMEI : str, dir : str) -> list:
             else: 
                 # If no file break was dected, we write to the previous file. Note that every maintext should start with a new file,
                 # if it doesnt then the program will write to the non existing previous file 
-                # # and there will be an exeption since current_file = '' by defult and this cannont be written to.
+                
                 try: 
                     with open(current_file, 'a') as f:
                         # if the doc was time stamped correctly we will add the time to each sample
@@ -232,6 +240,12 @@ def create_files(IMEI : str, dir : str) -> list:
 
 
 def csv_kml(IMEI, dir):
+    '''
+    This function takes the IMEI of an active minion and a valid minion data path (as created by MD_gui.py) 
+    and returns the iridium location data. The location data sent by iridium (not the minion) is meta data that 
+    is sent with the sbd, so the data is located in the csv file for a corrosponding device. 
+    The data is returned in the form expected by simplekml. 
+    '''
     try:
         path = dir + _SLASH + 'csv'
         file = 'imei_' + str(IMEI) + '.csv'
