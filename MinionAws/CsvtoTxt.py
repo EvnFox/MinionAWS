@@ -53,16 +53,22 @@ def convert(IMEI : str, dir : str):
         # we let glob randomize their order and then reorder the csv using iridiums time data. 
         df = df.sort_values(by=1)
         
+
+        counter = 0 
         # loop through payloads
         for i in df.iloc[0:df.shape[0], 5]: 
+            counter = counter + 1
             # This is a failed connection on aws side
-            if i == 'NaN':
+            if str(i) == 'NaN' or str(i) == 'nan':
+                if str(i) == 'nan': 
+                    print("nan found at :" + file_path + ", location " + str(counter) ) 
                 continue
 
-            # Decode the hex format into ascii
-            j = bytes.fromhex(i)
+            
+            j = bytes.fromhex(str(i))
             ascii = j.decode("ASCII")
             
+                
             # This loop inserts a new line whenever a file break is detected, this makes our life easier in the create_files function.
             # We change the range in the first loop since we do not want to add a newline to the top of the file
             if line_num == 0: 
@@ -138,7 +144,9 @@ def create_files(IMEI : str, dir : str) -> list:
                 delims = line.split(',')
 
                 # When a file break is deteced we create a new filepath with the file code appened to the end of the file path
-                current_file = path + _SLASH + str(delims[0]) + ".txt" 
+                if delims[0] == "$02": 
+
+                    current_file = path + _SLASH + str(delims[0]) + ".txt" 
 
                 # If the transmission was GPS
                 if delims[0] == '$04': 
